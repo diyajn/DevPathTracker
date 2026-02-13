@@ -1,7 +1,9 @@
 package com.org.example.service;
 
 import com.org.example.config.JwtHelper;
+import com.org.example.entities.RefreshToken;
 import com.org.example.entities.User;
+import com.org.example.payload.JwtResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -30,7 +34,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
 
-    public String login(String username, String password) {
+    public JwtResponse login(String username, String password) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
@@ -40,16 +44,20 @@ public class AuthService {
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return jwtHelper.generateToken(userDetails);
+        String token=jwtHelper.generateToken(userDetails);
+        RefreshToken refreshToken=refreshTokenService.createRefreshToken(username);
+        return new JwtResponse(token, refreshToken.getRefreshToken());
     }
 
-    public User signup(User user) {
+    public User signup(String username, String password) {
         // Check if username already exists
-        if (userService.existsByUsername(user.getUsername())) {
+        if (userService.existsByUsername(username)) {
             throw new RuntimeException("Username already taken");
         }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+       //create new user
+        User user=new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
         return userService.createUser(user);
     }
 
