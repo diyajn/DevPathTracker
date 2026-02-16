@@ -59,11 +59,20 @@
 			<version>3.0.1</version>
 		</dependency>
 
+
+		<!-- Validation -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
 		<!--for Spring Security and JWT Authentication-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+
+
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

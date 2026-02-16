@@ -3,7 +3,7 @@ package com.org.example.service;
 import com.org.example.config.JwtHelper;
 import com.org.example.entities.RefreshToken;
 import com.org.example.entities.User;
-import com.org.example.payload.JwtResponse;
+import com.org.example.dto.JwtResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

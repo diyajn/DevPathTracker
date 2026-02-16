@@ -1,4 +1,4 @@
-package com.org.example.payload;
+package com.org.example.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

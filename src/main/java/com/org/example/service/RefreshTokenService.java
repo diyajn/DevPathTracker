@@ -17,7 +17,7 @@ public class RefreshTokenService {
     @Autowired
     private UserRepository userRepository;
 
-    public long refreshTokenValidity=2*60*1000; //5hr ki validity
+    public long refreshTokenValidity=5*60*60*1000; //5hr ki validity
 
     //create refresh token
     public RefreshToken createRefreshToken(String username){
