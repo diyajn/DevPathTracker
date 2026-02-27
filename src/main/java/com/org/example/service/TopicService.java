@@ -21,6 +21,7 @@ public class TopicService {
 
     private final TopicRepository topicRepository;
     private final TopicMapper topicMapper;
+    private final LearningPathService learningPathService;  // NEW
 
     // Create a new topic
     @Transactional
@@ -41,6 +42,9 @@ public class TopicService {
         topic.setLastReviewed(topic.getLearnedDate());
 
         Topic savedTopic = topicRepository.save(topic);
+
+        // ADD THIS: Add to learning path
+        learningPathService.addToLearningPath(userId, savedTopic.getId());
 
         return enrichTopicResponse(savedTopic);
     }
@@ -122,6 +126,9 @@ public class TopicService {
     public void deleteTopic(Long id, Long userId) {
         Topic topic = topicRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found with id: " + id));
+
+        // ADD THIS: Remove from learning path
+        learningPathService.removeFromLearningPath(userId, id);
 
         topicRepository.delete(topic);
     }
