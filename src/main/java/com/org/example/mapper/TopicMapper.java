@@ -23,6 +23,10 @@ public class TopicMapper {
                 .tags(topic.getTags())
                 .createdAt(topic.getCreatedAt())
                 .updatedAt(topic.getUpdatedAt())
+                // NEW: SM-2 fields
+                .easinessFactor(topic.getEasinessFactor())
+                .repetitionCount(topic.getRepetitionCount())
+                .lastIntervalDays(topic.getLastIntervalDays())
                 .build();
     }
 

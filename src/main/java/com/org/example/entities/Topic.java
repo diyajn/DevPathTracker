@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -49,6 +50,20 @@ public class Topic {
 
     @Column(length = 500)
     private String tags;
+
+    // NEW: SM-2 Algorithm fields
+
+    //- precision = 3 and scale = 2 means the column can store up to 3 digits in total,
+    // with 2 digits after the decimal.
+    @Column(name = "easiness_factor", precision = 3, scale = 2)
+    private BigDecimal easinessFactor = BigDecimal.valueOf(2.5);
+
+    @Column(name = "repetition_count")
+    private Integer repetitionCount = 0;
+
+    @Column(name = "last_interval_days")
+    private Integer lastIntervalDays = 1;
+
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

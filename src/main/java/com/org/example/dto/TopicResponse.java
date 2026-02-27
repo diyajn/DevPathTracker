@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -28,4 +29,9 @@ public class TopicResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean hasChildren;  // Does this topic have child topics?
+
+    // NEW: SM-2 Algorithm fields
+    private BigDecimal easinessFactor;
+    private Integer repetitionCount;
+    private Integer lastIntervalDays;
 }

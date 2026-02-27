@@ -27,8 +27,35 @@ public class ReviewService {
     private final ReviewSessionRepository reviewRepository;
     private final TopicRepository topicRepository;
     private final ReviewMapper reviewMapper;
+    private final SM2AlgorithmService sm2AlgorithmService;  // NEW
 
-    // Record a review session
+    // Record a review session (using simple method)
+
+    //    @Transactional
+    //    public ReviewResponse recordReview(Long topicId, ReviewRequest request, Long userId) {
+    //        // Verify topic ownership
+    //        Topic topic = validateTopicOwnership(topicId, userId);
+    //
+    //        // Create review session
+    //        ReviewSession review = reviewMapper.toEntity(request, topicId, userId);
+    //
+    //        // Calculate simple next review date (will be improved in Step 6 with SM-2)
+    //        LocalDate nextReviewDate = calculateSimpleNextReviewDate(request.getRating());
+    //        review.setNextReviewDate(nextReviewDate);
+    //
+    //        // Save review
+    //        ReviewSession savedReview = reviewRepository.save(review);
+    //
+    //        // Update topic's last reviewed date and confidence
+    //        topic.setLastReviewed(LocalDate.now());
+    //        updateTopicConfidence(topic, userId);
+    //        topicRepository.save(topic);
+    //
+    //        return reviewMapper.toResponse(savedReview, topic.getName());
+    //    }
+
+    //UPDATED
+    // Record a review session (using SM-2 algo method)
     @Transactional
     public ReviewResponse recordReview(Long topicId, ReviewRequest request, Long userId) {
         // Verify topic ownership
@@ -37,16 +64,31 @@ public class ReviewService {
         // Create review session
         ReviewSession review = reviewMapper.toEntity(request, topicId, userId);
 
-        // Calculate simple next review date (will be improved in Step 6 with SM-2)
-        LocalDate nextReviewDate = calculateSimpleNextReviewDate(request.getRating());
+        // Use SM-2 algorithm to calculate next review date
+        SM2AlgorithmService.SM2Result sm2Result = sm2AlgorithmService.calculateNext(
+                request.getRating(),
+                topic.getEasinessFactor(),
+                topic.getRepetitionCount(),
+                topic.getLastIntervalDays()
+        );
+
+        // Calculate next review date
+        LocalDate nextReviewDate = LocalDate.now().plusDays(sm2Result.getIntervalDays());
         review.setNextReviewDate(nextReviewDate);
 
         // Save review
         ReviewSession savedReview = reviewRepository.save(review);
 
-        // Update topic's last reviewed date and confidence
+        // Update topic with SM-2 results
         topic.setLastReviewed(LocalDate.now());
+        topic.setEasinessFactor(sm2Result.getEasinessFactor());
+        topic.setRepetitionCount(sm2Result.getRepetitionCount());
+        topic.setLastIntervalDays(sm2Result.getIntervalDays());
+
+        // Update confidence level based on recent reviews
         updateTopicConfidence(topic, userId);
+
+        // Save updated topic
         topicRepository.save(topic);
 
         return reviewMapper.toResponse(savedReview, topic.getName());
@@ -155,18 +197,18 @@ public class ReviewService {
     }
 
     // Helper: Simple next review date calculation (improved in Step 6)
-    private LocalDate calculateSimpleNextReviewDate(Integer rating) {
-        LocalDate today = LocalDate.now();
-
-        switch (rating) {
-            case 1: return today.plusDays(1);   // Hard: review tomorrow
-            case 2: return today.plusDays(2);   // Okay: review in 2 days
-            case 3: return today.plusDays(4);   // Good: review in 4 days
-            case 4: return today.plusDays(7);   // Easy: review in 1 week
-            case 5: return today.plusDays(14);  // Perfect: review in 2 weeks
-            default: return today.plusDays(1);
-        }
-    }
+//    private LocalDate calculateSimpleNextReviewDate(Integer rating) {
+//        LocalDate today = LocalDate.now();
+//
+//        switch (rating) {
+//            case 1: return today.plusDays(1);   // Hard: review tomorrow
+//            case 2: return today.plusDays(2);   // Okay: review in 2 days
+//            case 3: return today.plusDays(4);   // Good: review in 4 days
+//            case 4: return today.plusDays(7);   // Easy: review in 1 week
+//            case 5: return today.plusDays(14);  // Perfect: review in 2 weeks
+//            default: return today.plusDays(1);
+//        }
+//    }
 
     // Helper: Update topic confidence based on recent reviews
     private void updateTopicConfidence(Topic topic, Long userId) {
